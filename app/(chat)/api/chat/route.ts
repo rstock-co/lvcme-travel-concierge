@@ -22,6 +22,10 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { searchFlights } from '@/lib/ai/tools/search-flights';
+import { searchHotels } from '@/lib/ai/tools/search-hotels';
+import { searchEntertainment } from '@/lib/ai/tools/search-entertainment';
+import { getCourseData } from '@/lib/ai/tools/get-course-data';
 import { isProductionEnvironment } from '@/lib/constants';
 import { NextResponse } from 'next/server';
 import { myProvider } from '@/lib/ai/providers';
@@ -34,10 +38,12 @@ export async function POST(request: Request) {
       id,
       messages,
       selectedChatModel,
+      chatType,
     }: {
       id: string;
       messages: Array<Message>;
       selectedChatModel: string;
+      chatType?: string;
     } = await request.json();
 
     const session = await auth();
@@ -74,7 +80,7 @@ export async function POST(request: Request) {
       execute: (dataStream) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel }),
+          system: systemPrompt({ selectedChatModel, chatType }),
           messages,
           maxSteps: 5,
           experimental_activeTools:
@@ -85,6 +91,10 @@ export async function POST(request: Request) {
                   'createDocument',
                   'updateDocument',
                   'requestSuggestions',
+                  'searchFlights',
+                  'searchHotels',
+                  'searchEntertainment',
+                  'getCourseData',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -96,6 +106,10 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            searchFlights,
+            searchHotels,
+            searchEntertainment,
+            getCourseData,
           },
           onFinish: async ({ response, reasoning }) => {
             if (session.user?.id) {
