@@ -1,6 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { generateTravelPlan } from '../chains/travel-planning-chain';
+import { logToolInvocation, logTravelPlanningChain, logError } from '@/lib/debug';
 
 export const generateTravelPlanTool = tool({
   description: 'Generate a complete travel plan based on selected flight, hotel, and entertainment options',
@@ -48,14 +49,20 @@ export const generateTravelPlanTool = tool({
   }),
   execute: async ({ courseData, selectedFlights, selectedHotel, selectedEntertainment, budget }) => {
     try {
-      // Generate the travel plan using LangChain
-      const travelPlanContent = await generateTravelPlan({
+      // Log input to travel planning chain
+      const planInput = {
         courseData,
         flightData: selectedFlights,
         hotelData: selectedHotel,
         entertainmentData: selectedEntertainment,
         budget
-      });
+      };
+
+      // Generate the travel plan using LangChain
+      const travelPlanContent = await generateTravelPlan(planInput);
+
+      // Log output from travel planning chain
+      logTravelPlanningChain(planInput, travelPlanContent);
 
       // Calculate total cost
       const flightsCost = selectedFlights.reduce((total, flight) => total + flight.price, 0);
@@ -63,7 +70,7 @@ export const generateTravelPlanTool = tool({
       const entertainmentCost = selectedEntertainment.reduce((total, item) => total + item.price, 0);
       const totalCost = flightsCost + hotelCost + entertainmentCost;
 
-      return {
+      const result = {
         travelPlan: travelPlanContent,
         summary: {
           courseTitle: courseData.title,
@@ -74,8 +81,13 @@ export const generateTravelPlanTool = tool({
           entertainmentCost: entertainmentCost
         }
       };
+
+      // Log the tool invocation for debugging
+      logToolInvocation('generateTravelPlan', { courseData, selectedFlights, selectedHotel, selectedEntertainment, budget }, result);
+
+      return result;
     } catch (error) {
-      console.error('Error generating travel plan:', error);
+      logError('generateTravelPlan', error);
       return {
         error: "Failed to generate travel plan"
       };
