@@ -1,4 +1,8 @@
 import type { NextAuthConfig } from 'next-auth';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const authConfig = {
   pages: {
@@ -10,6 +14,17 @@ export const authConfig = {
     // while this file is also used in non-Node.js environments
   ],
   callbacks: {
+    async jwt({ token, account, profile }) {
+      if (account && profile) {
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        // You can add custom logic for Supabase user session here
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add custom session data if needed
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnChat = nextUrl.pathname.startsWith('/');
