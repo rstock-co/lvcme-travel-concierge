@@ -5,8 +5,15 @@ import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const id = generateUUID();
+
+  // Get the chat type from URL query params
+  const chatType = searchParams.type as string | undefined;
 
   const cookieStore = await cookies();
   const modelIdFromCookie = cookieStore.get('chat-model');
@@ -21,6 +28,7 @@ export default async function Page() {
           selectedChatModel={DEFAULT_CHAT_MODEL}
           selectedVisibilityType="private"
           isReadonly={false}
+          chatType={chatType}
         />
         <DataStreamHandler id={id} />
       </>
@@ -36,6 +44,7 @@ export default async function Page() {
         selectedChatModel={modelIdFromCookie.value}
         selectedVisibilityType="private"
         isReadonly={false}
+        chatType={chatType}
       />
       <DataStreamHandler id={id} />
     </>

@@ -13,6 +13,7 @@ import { Messages } from './messages';
 import { VisibilityType } from './visibility-selector';
 import { useArtifactSelector } from '@/hooks/use-artifact';
 import { toast } from 'sonner';
+import { TravelConciergeInitializer } from './travel-concierge-initializer';
 
 export function Chat({
   id,
@@ -20,12 +21,14 @@ export function Chat({
   selectedChatModel,
   selectedVisibilityType,
   isReadonly,
+  chatType,
 }: {
   id: string;
   initialMessages: Array<Message>;
   selectedChatModel: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  chatType?: string;
 }) {
   const { mutate } = useSWRConfig();
 
@@ -41,7 +44,7 @@ export function Chat({
     reload,
   } = useChat({
     id,
-    body: { id, selectedChatModel: selectedChatModel },
+    body: { id, selectedChatModel: selectedChatModel, chatType: chatType },
     initialMessages,
     experimental_throttle: 100,
     sendExtraMessageFields: true,
@@ -65,6 +68,14 @@ export function Chat({
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
+        {chatType === 'travel-concierge' && (
+          <TravelConciergeInitializer
+            chatType={chatType}
+            append={append}
+            messages={messages}
+          />
+        )}
+
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}

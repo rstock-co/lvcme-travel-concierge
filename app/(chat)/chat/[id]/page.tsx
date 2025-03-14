@@ -8,9 +8,18 @@ import { convertToUIMessages } from '@/lib/utils';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const { id } = params;
+
+  // Get the chat type from URL query params
+  const chatType = searchParams.type as string | undefined;
+
   const chat = await getChatById({ id });
 
   if (!chat) {
@@ -45,6 +54,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           selectedChatModel={DEFAULT_CHAT_MODEL}
           selectedVisibilityType={chat.visibility}
           isReadonly={session?.user?.id !== chat.userId}
+          chatType={chatType}
         />
         <DataStreamHandler id={id} />
       </>
@@ -59,6 +69,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         selectedChatModel={chatModelFromCookie.value}
         selectedVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
+        chatType={chatType}
       />
       <DataStreamHandler id={id} />
     </>
