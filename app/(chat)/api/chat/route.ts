@@ -26,6 +26,7 @@ import { searchFlights } from '@/lib/ai/tools/search-flights';
 import { searchHotels } from '@/lib/ai/tools/search-hotels';
 import { searchEntertainment } from '@/lib/ai/tools/search-entertainment';
 import { getCourseData } from '@/lib/ai/tools/get-course-data';
+import { generateTravelPlanTool } from '@/lib/ai/tools/generate-travel-plan';
 import { isProductionEnvironment } from '@/lib/constants';
 import { NextResponse } from 'next/server';
 import { myProvider } from '@/lib/ai/providers';
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
                   'searchHotels',
                   'searchEntertainment',
                   'getCourseData',
+                  'generateTravelPlanTool',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -110,6 +112,7 @@ export async function POST(request: Request) {
             searchHotels,
             searchEntertainment,
             getCourseData,
+            generateTravelPlanTool,
           },
           onFinish: async ({ response, reasoning }) => {
             if (session.user?.id) {
