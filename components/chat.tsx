@@ -57,8 +57,12 @@ export function Chat({
     },
   });
 
+  const voteApiUrl = chatType === 'travel-concierge'
+    ? `/api/vote?chatId=${id}&type=travel-concierge`
+    : `/api/vote?chatId=${id}`;
+
   const { data: votes } = useSWR<Array<Vote>>(
-    `/api/vote?chatId=${id}`,
+    voteApiUrl,
     fetcher,
   );
 
